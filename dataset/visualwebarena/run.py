@@ -41,11 +41,11 @@ if __name__ == "__main__":
     args.oss_bucket = 'antsys-aworldspace-prod'
     args.oss_rel_path = '/ml001/browser_agent/vwa/'
     caption_models = [
-        'KevinBlip',
+        # 'KevinBlip',
         'KevinBlip2',
         'KevinBlip3',
         'KevinBlip4',
-        'KevinBlip',
+        # 'KevinBlip',
         'KevinBlip2',
         'KevinBlip3',
         'KevinBlip4',
@@ -53,9 +53,9 @@ if __name__ == "__main__":
 
     providers = [
         # 'KevinQwen', 
-        'KevinQwen2', 
-        'KevinQwen3', 
-        'KevinQwen4', 
+        # 'KevinQwen2', 
+        # 'KevinQwen3', 
+        # 'KevinQwen4', 
         'zg-qw72b-h1', 
         # 'zg-qw72b-h2', 
         # 'zg-qw72b-h3', 
@@ -64,16 +64,17 @@ if __name__ == "__main__":
     multi_process = True
     args.model = 'qwen25vl72b'
     args.mode = 'mas' # som, vision, mas
-    domains = ['shopping']
+    domains = ['reddit']
     args.enable_oss = False
     args.render = False
 
+    # for debug
     providers = [ 'KevinQwen2' ]
     multi_process = False
     # args.model = 'gpt4o'
     args.model = 'qwen25vl72b'
     args.mode = 'mas'
-    domains = ['shopping']
+    domains = ['reddit']
     args.enable_oss = False
     args.print_time = True
     args.output_response = True
@@ -81,8 +82,8 @@ if __name__ == "__main__":
     args.test_start_idx = 0
     args.test_end_idx = 0
 
-    # if not check_providers(providers): exit()
-    # if not check_providers(caption_models): exit()
+    if not check_providers(providers): exit()
+    if not check_providers(caption_models): exit()
     n_chunks = len(providers)
     for domain in domains:
         args.domain = domain

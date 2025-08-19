@@ -24,3 +24,4 @@ internvl_chat/work_dirs/internvl_chat_v2_5/internvl2_5_1b_dynamic_res_2nd_finetu
 tensorboard_log/
 *.DS_Store
 .env
+llm_service/xifeng_llm/config/account.conf
