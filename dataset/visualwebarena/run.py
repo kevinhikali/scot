@@ -41,11 +41,11 @@ if __name__ == "__main__":
     args.oss_bucket = 'antsys-aworldspace-prod'
     args.oss_rel_path = '/ml001/browser_agent/vwa/'
     caption_models = [
-        'KevinBlip',
+        # 'KevinBlip',
         'KevinBlip2',
         'KevinBlip3',
         'KevinBlip4',
-        'KevinBlip',
+        # 'KevinBlip',
         'KevinBlip2',
         'KevinBlip3',
         'KevinBlip4',
@@ -61,29 +61,30 @@ if __name__ == "__main__":
         # 'zg-qw72b-h3', 
         # 'zg-qw72b-h4'
     ]
-    multi_process = True
+    multi_process = False
     args.model = 'qwen25vl72b'
     args.mode = 'mas' # som, vision, mas
     domains = ['shopping']
     args.enable_oss = False
     args.render = False
 
-    # providers = [ 'KevinQwen2' ]
-    # multi_process = False
-    # # args.model = 'gpt4o'
+    providers = [ 'openai' ]
+    # providers = [ 'KevinQwen' ]
+    multi_process = False
+    args.model = 'gpt-5-chat'
     # args.model = 'qwen25vl72b'
-    # args.mode = 'mas'
-    # domains = ['shopping']
-    # args.enable_oss = False
-    # args.print_time = True
-    # args.output_response = True
-    # args.render = True
-    # args.test_start_idx = 0
-    # args.test_end_idx = 0
-    # args.flush = True
+    args.mode = 'mas'
+    domains = ['shopping']
+    args.enable_oss = False
+    args.print_time = True
+    args.output_response = True
+    args.render = True
+    args.flush = True
+    args.test_start_idx = 0
+    args.test_end_idx = 0
 
-    # if not check_providers(providers): exit()
-    # if not check_providers(caption_models): exit()
+    if not check_providers(providers): exit()
+    if not check_providers(caption_models): exit()
     n_chunks = len(providers)
     for domain in domains:
         args.domain = domain
