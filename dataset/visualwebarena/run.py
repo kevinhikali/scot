@@ -80,7 +80,7 @@ if __name__ == "__main__":
     args.output_response = True
     args.render = True
     args.test_start_idx = 0
-    args.test_end_idx = 5
+    args.test_end_idx = 0
 
     if not check_providers(providers): exit()
     if not check_providers(caption_models): exit()

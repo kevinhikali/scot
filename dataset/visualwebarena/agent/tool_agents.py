@@ -4,16 +4,12 @@ from playwright.async_api import async_playwright
 import os
 import imagehash
 from PIL import Image
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import (
-	BaseMessage,
-	HumanMessage,
-	SystemMessage,
-)
+from llm_service.ais_requestor import KevinAISRequestor
 import base64
 import requests
-from PIL import Image
+import PIL, PIL.JpegImagePlugin
 from io import BytesIO
+from openai import OpenAI
 
 class SimJudger:
     def __init__(self,
@@ -26,6 +22,11 @@ class SimJudger:
         self.LLM_API_KEY=LLM_API_KEY
         self.LLM_BASE_URL=LLM_BASE_URL
         self.temperature=temperature
+        self.client = OpenAI(
+            api_key = self.LLM_API_KEY,
+            base_url = self.LLM_BASE_URL,
+            timeout = 60000,
+        )
 
     def phash_similarity(self, img1, img2):
         h1 = imagehash.phash(img1)
@@ -38,34 +39,62 @@ class SimJudger:
         return 1 - (h1 - h2) / 64.0
 
     def llm_similarity(self, img1,img2):
-        llm=ChatOpenAI(
-            model=self.LLM_MODEL_NAME,
-            api_key=self.LLM_API_KEY,
-            base_url=self.LLM_BASE_URL,
-            temperature=self.temperature,
-        )
         image_data1 = self.image_to_base64(img1)
         image_data2 = self.image_to_base64(img2)
-        
+        messages = \
+        [
+            {
+                'role': 'system', 
+                'content': 'You are a helpful assistant.'
+            }, 
+            {
+                'role': 'user', 
+                'content': [
+                    {
+                        'type': 'text', 
+                        'text': "给出这两张图片的相似度，直接输出0~1.0中的值"
+                    },
+                    {
+                        'type': 'image_url', 
+                        'image_url': { 
+                            'url': f'data:image/png;base64,{image_data1}' 
+                        }
+                    },
+                    {
+                        'type': 'image_url', 
+                        'image_url': { 
+                            'url': f'data:image/png;base64,{image_data2}' 
+                        }
+                    }
+                ]
+            }
+        ]
         resp=""
         try:
-            message = HumanMessage(
-                content=[
-                    {"type": "text", "text": "给出这两张图片的相似度，直接输出0~1.0中的值"},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpg;base64,{image_data1}"}},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpg;base64,{image_data2}"}}
-                ]
+            response = self.client.chat.completions.create(
+                model = self.LLM_MODEL_NAME,
+                messages = messages,
+                temperature = self.temperature,
+                max_tokens = 1024,
             )
-            input_messages=[message]
-            resp=float(llm.invoke(input_messages).content)
+            resp = response.choices[0].message.content
+            resp=float(resp)
+        
         except Exception as e:
             print(e)
 
         return resp
     
     def image_to_base64(self, img):
+        format='png'
+        if isinstance(img, PIL.JpegImagePlugin.JpegImageFile): 
+            format = 'jpg'
+        if format == 'jpg': 
+            format = 'JPEG'
+        elif format == 'png': 
+            format = 'PNG'
         buffered = io.BytesIO()
-        img.save(buffered, format=img.format)
+        img.save(buffered, format=format)
         img_byte = buffered.getvalue()
         img_base64 = base64.b64encode(img_byte).decode('utf-8')
         return img_base64
