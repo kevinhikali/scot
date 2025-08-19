@@ -21,7 +21,9 @@ def method_mapper(method):
     if 'vision' in method:
         return 'Multimodel Image + Caps + Acc. Tree'
     elif 'som' in method:
-        return 'Multimodel (SoM) Image + Caps + SoM'
+        return 'Multimodel (SoM) Image + Caps'
+    elif 'mas' in method:
+        return 'Multimodel (SoM) Image + Caps + MAS'
     else:
         raise ValueError('Bad method name')
 

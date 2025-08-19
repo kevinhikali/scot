@@ -367,6 +367,7 @@ class MultiAgent(Agent):
         self.captioning_fn = captioning_fn
         self.multimodal_inputs = True
 
+        kq_config = {}
         if 'qwen' in self.lm_config.model:
             kq_config = {
                 'api_key': '123',
@@ -375,7 +376,17 @@ class MultiAgent(Agent):
                 'temperature': 0.0,
                 'max_tokens': 4096,
             }
-            self.kq = KevinAISRequestor(kq_config)
+        elif 'gpt' in self.lm_config.model:
+            kq_config = {
+                'api_key': os.getenv("OPENROUTER_KEY"),
+                'model': f'openai/{self.lm_config.model}',
+                'base_url': "https://openrouter.ai/api/v1",
+                'temperature': 0.0,
+                'max_tokens': 4096,
+            }
+        else:
+            raise ValueError(f'{self.lm_config}')
+        self.kq = KevinAISRequestor(kq_config)
 
     def set_action_set_tag(self, tag: str) -> None:
         self.action_set_tag = tag

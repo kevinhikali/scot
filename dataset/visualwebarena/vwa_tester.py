@@ -437,79 +437,75 @@ class VWATester():
 
     def test(self):
         for config_file in tqdm(self.args.test_config_files, multiprocessing.current_process().name):
-            try:
-                _c = u.read_json(config_file)
-                sites = _c['sites']
-                if self.args.single_site_mode and len(sites) != 1: 
-                    WARN(f'{u.get_name(config_file)} is multi sites task: {sites}')
-                    continue
-                intent = _c["intent"]
-                task_id = _c["task_id"]
-                result_file = f'{self.ph.metrics_path}/{task_id}.json'
-                if u.is_file_exist(result_file) and not self.args.flush: 
-                    INFO('skip')
-                    continue
-                if task_id < self.args.test_start_idx or task_id > self.args.test_end_idx: continue
+            _c = u.read_json(config_file)
+            sites = _c['sites']
+            if self.args.single_site_mode and len(sites) != 1: 
+                WARN(f'{u.get_name(config_file)} is multi sites task: {sites}')
+                continue
+            intent = _c["intent"]
+            task_id = _c["task_id"]
+            result_file = f'{self.ph.metrics_path}/{task_id}.json'
+            if u.is_file_exist(result_file) and not self.args.flush: 
+                INFO('skip')
+                continue
+            if task_id < self.args.test_start_idx or task_id > self.args.test_end_idx: continue
 
-                u.write_json(f'{self.ph.config_dir}/{task_id}.json', vars(self.args))
-                render_file = f'{self.ph.render_dir}/{task_id}.html'
-                # self.auto_loging(_c, config_file) # TODO
-                image_paths = _c.get("image", None)
-                images = self.load_input_image(image_paths)
+            u.write_json(f'{self.ph.config_dir}/{task_id}.json', vars(self.args))
+            render_file = f'{self.ph.render_dir}/{task_id}.html'
+            # self.auto_loging(_c, config_file) # TODO
+            image_paths = _c.get("image", None)
+            images = self.load_input_image(image_paths)
 
-                traj_file = f'{self.ph.traj_path}/{task_id}.json'
-                trajectory = []
+            traj_file = f'{self.ph.traj_path}/{task_id}.json'
+            trajectory = []
 
-                render_helper = None
-                if self.args.render:
-                    render_helper = RenderHelper(_c, render_file, self.args.action_set_tag, images)
-                
-                i_retry = 0
-                while i_retry < self.args.max_retry:
-                    trajectory = self.rollout(config_file, intent, images, render_helper)
-                    if trajectory: break
-                    i_retry += 1
-                if i_retry == self.args.max_retry: 
-                    return
+            render_helper = None
+            if self.args.render:
+                render_helper = RenderHelper(_c, render_file, self.args.action_set_tag, images)
+            
+            i_retry = 0
+            while i_retry < self.args.max_retry:
+                trajectory = self.rollout(config_file, intent, images, render_helper)
+                if trajectory: break
+                i_retry += 1
+            if i_retry == self.args.max_retry: 
+                return
 
-                last_ob_idx = self.__find_last_ob(trajectory)
-                for i in range(len(trajectory)):
-                    step = trajectory[i]
-                    if i == last_ob_idx:
-                        last_page = trajectory[i]['info']['page']
-                        trajectory[i]['info']['page'] = {'url': last_page.url, 'content': last_page.content}
-                    if 'observation' in step.keys() and i != last_ob_idx:
-                        del trajectory[i]['info']['page']
-                    if 'observation' in step.keys():
-                        del trajectory[i]['observation']
-                    if 'coords' in step.keys():
-                        trajectory[i]['coords'] = trajectory[i]['coords'].tolist()
-                u.write_json(traj_file, trajectory)
+            last_ob_idx = self.__find_last_ob(trajectory)
+            for i in range(len(trajectory)):
+                step = trajectory[i]
+                if i == last_ob_idx:
+                    last_page = trajectory[i]['info']['page']
+                    trajectory[i]['info']['page'] = {'url': last_page.url, 'content': last_page.content}
+                if 'observation' in step.keys() and i != last_ob_idx:
+                    del trajectory[i]['info']['page']
+                if 'observation' in step.keys():
+                    del trajectory[i]['observation']
+                if 'coords' in step.keys():
+                    trajectory[i]['coords'] = trajectory[i]['coords'].tolist()
+            u.write_json(traj_file, trajectory)
 
-                last_page = self.env.page
+            last_page = self.env.page
 
-                if render_helper: render_helper.close()
-                if self.args.enable_oss: self.submit_task(render_file)
+            if render_helper: render_helper.close()
+            if self.args.enable_oss: self.submit_task(render_file)
 
-                eval_types = _c["eval"]["eval_types"]
-                evaluator = evaluator_router(
-                    eval_types, 
-                    captioning_fn = self.eval_caption_image_fn
-                )
-                start_time = time.time()
-                score = evaluator(
-                    trajectory=trajectory,
-                    config_file=config_file,
-                    page=last_page
-                )
-                end_time = time.time()
-                if self.print_time:
-                    INFO(f'eval time = {round(end_time - start_time, 2)}, result = {score}')
+            eval_types = _c["eval"]["eval_types"]
+            evaluator = evaluator_router(
+                eval_types, 
+                captioning_fn = self.eval_caption_image_fn
+            )
+            start_time = time.time()
+            score = evaluator(
+                trajectory=trajectory,
+                config_file=config_file,
+                page=last_page
+            )
+            end_time = time.time()
+            if self.print_time:
+                INFO(f'eval time = {round(end_time - start_time, 2)}, result = {score}')
 
-                u.write_json(result_file, {task_id: score})
-
-            except Exception as e:
-                ERROR(f'{e}')
+            u.write_json(result_file, {task_id: score})
 
         if self.args.enable_oss:
             self.wait_until_all_tasks_done()

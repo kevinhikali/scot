@@ -61,7 +61,7 @@ if __name__ == "__main__":
         # 'zg-qw72b-h3', 
         # 'zg-qw72b-h4'
     ]
-    multi_process = True
+    multi_process = False
     args.model = 'qwen25vl72b'
     args.mode = 'mas' # som, vision, mas
     domains = ['reddit']

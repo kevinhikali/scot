@@ -93,6 +93,7 @@ To be successful, it is very important to follow the following rules:
 2. You should only issue one action at a time.
 3. Issue stop action when you think you have achieved the objective. Don't generate anything after stop.
 4. Don't use the search bar and sort-by list in the page, it's broken.
+5. Generate the action in the correct format. For example, \"```click [1234]```\".
 
 Answer in the following json format:
 ```json
