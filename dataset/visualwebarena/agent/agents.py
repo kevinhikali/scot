@@ -681,12 +681,13 @@ class MultiAgent(Agent):
 
             slave_response = 'In summary, the next action I will perform is ```stop []```'
             if 'image_searcher' in master_response:
+                slave_response=f'There is no most similar item in current viewport. click the "more" button to see more items'
                 sim_judger=SimJudger(LLM_MODEL_NAME="zg-qw72b-h4", LLM_API_KEY="xx", LLM_BASE_URL="https://agi.alipay.com/api")
                 max_sims,max_item= sim_judger.get_item(input_img,meta_data["page"],sim_method="ahash_similarity")
                 if max_item:
-                    comments_url = max_item["comments_url"]
-                    if comments_url:
-                        slave_response = f'In summary, the next action I will perform is ```goto [http://localhost:9999{comments_url}]```'
+                    print("MAX SIMS",max_sims)
+                    if max_sims>=0.9:
+                        slave_response = f'This is the information of the item that most similar to queried image: \nsimilarity: {max_sims}\n{json.dumps(max_item)}'
 
             elif 'shopping_guide' in master_response:
                 cate_file = f'{u.get_nas()}/gui_dataset/visualwebarena/shopping_categories.json'

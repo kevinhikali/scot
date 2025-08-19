@@ -93,9 +93,9 @@ class SimJudger:
                 item_img     = row.locator('xpath=..//div[@class="submission__inner"]/header/div/h1/a/img').get_attribute('src')
             else:
                 item_img = None
-            if row.locator('xpath=.//nav[@class="submission__nav"]/ul/li/a/strong').is_visible():
-                comments_txt = row.locator('xpath=.//nav[@class="submission__nav"]/ul/li/a/strong').inner_text()
-                comments_url = row.locator('xpath=.//nav[@class="submission__nav"]/ul/li/a').get_attribute('href')
+            if row.locator('xpath=.//nav[@class="submission__nav"]/ul/li[1]/a/strong').is_visible():
+                comments_txt = row.locator('xpath=.//nav[@class="submission__nav"]/ul/li[1]/a/strong').inner_text()
+                comments_url = row.locator('xpath=.//nav[@class="submission__nav"]/ul/li[1]/a').get_attribute('href')
             else:
                 comments_txt, comments_url = None, None
             if row.locator('xpath=.//div[@class="submission__vote"]/form/span[1]').is_visible():
@@ -127,7 +127,8 @@ class SimJudger:
         for item in items_li:
             if item["item_img"] is None:
                 continue
-            item_img_path="http://localhost:9999"+item["item_img"]
+            # item_img_path="http://localhost:9999"+item["item_img"]
+            item_img_path=item["title_url"]
             img2=self.url_to_pil_image(item_img_path)
             if sim_method=="phash_similarity":
                 sims=self.phash_similarity(query_img,img2)
