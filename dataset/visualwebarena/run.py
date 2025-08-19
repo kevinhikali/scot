@@ -52,11 +52,11 @@ if __name__ == "__main__":
     ]
 
     providers = [
-        'KevinQwen', 
+        # 'KevinQwen', 
         'KevinQwen2', 
         'KevinQwen3', 
         'KevinQwen4', 
-        # 'zg-qw72b-h1', 
+        'zg-qw72b-h1', 
         # 'zg-qw72b-h2', 
         # 'zg-qw72b-h3', 
         # 'zg-qw72b-h4'
@@ -68,19 +68,18 @@ if __name__ == "__main__":
     args.enable_oss = False
     args.render = False
 
-    # providers = [ 'KevinQwen2' ]
-    # multi_process = False
-    # # args.model = 'gpt4o'
-    # args.model = 'qwen25vl72b'
-    # args.mode = 'mas'
-    # domains = ['shopping']
-    # args.enable_oss = False
-    # args.print_time = True
-    # args.output_response = True
-    # args.render = True
-    # args.test_start_idx = 0
-    # args.test_end_idx = 0
-    # args.flush = True
+    providers = [ 'KevinQwen2' ]
+    multi_process = False
+    # args.model = 'gpt4o'
+    args.model = 'qwen25vl72b'
+    args.mode = 'mas'
+    domains = ['shopping']
+    args.enable_oss = False
+    args.print_time = True
+    args.output_response = True
+    args.render = True
+    args.test_start_idx = 0
+    args.test_end_idx = 0
 
     # if not check_providers(providers): exit()
     # if not check_providers(caption_models): exit()

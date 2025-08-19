@@ -364,14 +364,16 @@ class MultiAgent(Agent):
         self.action_set_tag = action_set_tag
         self.captioning_fn = captioning_fn
         self.multimodal_inputs = True
-        kq_config = {
-            'api_key': '123',
-            'model': lm_config.provider,
-            'base_url': "https://agi-pre.alipay.com/api",
-            'temperature': 0.0,
-            'max_tokens': 4096,
-        }
-        self.kq = KevinAISRequestor(kq_config)
+
+        if 'qwen' in self.lm_config.model:
+            kq_config = {
+                'api_key': '123',
+                'model': lm_config.provider,
+                'base_url': "https://agi-pre.alipay.com/api",
+                'temperature': 0.0,
+                'max_tokens': 4096,
+            }
+            self.kq = KevinAISRequestor(kq_config)
 
     def set_action_set_tag(self, tag: str) -> None:
         self.action_set_tag = tag
@@ -548,13 +550,7 @@ class MultiAgent(Agent):
 
         while 1:
             try:
-                model = self.lm_config.model
-                if 'qwen' in model:
-                    response = self.kq.infer_messages(messages)
-                elif 'gpt' in model:
-                    response = request_messages(messages)
-                else:
-                    raise ValueError(lm_config)
+                response = self.kq.infer_messages(messages)
                 break
             except Exception as e:
                 ERROR(f'{self.lm_config} {e}')
