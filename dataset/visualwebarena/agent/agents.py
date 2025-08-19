@@ -43,6 +43,8 @@ from dataset.multimodel_mind2web.prompt_parser import parse_response_vwa as pars
 from dataset.multimodel_mind2web.prompt_parser import prompt_bbox_vwa as prompt_f
 import mas_prompts as mp
 
+from dataset.visualwebarena.agent.tool_agents import SimJudger
+
 class Agent:
     """Base class for the agent"""
 
@@ -679,11 +681,13 @@ class MultiAgent(Agent):
 
             slave_response = 'In summary, the next action I will perform is ```stop []```'
             if 'image_searcher' in master_response:
-                pr_image_searcher = mp.image_searcher.format(
-                    TASK = intent, 
-                    ACTION_HISTORY = action_history
-                )
-                slave_response = self.__request(pr_image_searcher, input_img, som_page_screenshot_img)
+                sim_judger=SimJudger(LLM_MODEL_NAME="zg-qw72b-h4", LLM_API_KEY="xx", LLM_BASE_URL="https://agi.alipay.com/api")
+                max_sims,max_item= sim_judger.get_item(input_img,meta_data["page"],sim_method="ahash_similarity")
+                if max_item:
+                    comments_url = max_item["comments_url"]
+                    if comments_url:
+                        slave_response = f'In summary, the next action I will perform is ```goto [http://localhost:9999{comments_url}]```'
+
             elif 'shopping_guide' in master_response:
                 cate_file = f'{u.get_nas()}/gui_dataset/visualwebarena/shopping_categories.json'
                 raw_categories = u.read_json(cate_file)

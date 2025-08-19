@@ -79,8 +79,8 @@ if __name__ == "__main__":
     args.print_time = True
     args.output_response = True
     args.render = True
-    args.test_start_idx = 0
-    args.test_end_idx = 0
+    args.test_start_idx = 2
+    args.test_end_idx = 5
 
     if not check_providers(providers): exit()
     if not check_providers(caption_models): exit()

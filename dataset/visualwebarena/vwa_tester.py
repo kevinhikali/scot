@@ -353,6 +353,7 @@ class VWATester():
                 action = create_stop_action(f"Early stop: {stop_info}")
             else:
                 meta_data = self.handle_meta_bf(meta_data, trajectory)
+                meta_data["page"]=self.env.page
                 try:
                     start_time = time.time()
                     action = self.agent.next_action(
